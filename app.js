@@ -154,7 +154,7 @@ function buildObservatory() {
 }
 
 function buildHound() {
-  hound = new THREE.Group(); hound.name = 'wild-hound-guardian'; hound.position.set(-10.5, .95, 5.4); hound.rotation.y = -.32; root.add(hound);
+  hound = new THREE.Group(); hound.name = 'wild-hound-guardian'; hound.position.set(3.6, 2.08, 3.4); hound.rotation.y = -Math.PI / 2; root.add(hound);
   const fur = mat(0x8b563d, 0x3e1f2b, .18, .82, .06); const darkFur = mat(0x39202a, 0x170f1b, .1, .9, .03); const warm = mat(0xc98252, 0x3e1b25, .28, .72, .08); const eye = mat(0xffc66e, 0xff7c47, 2.9, .18, .15);
   const body = new THREE.Mesh(new THREE.SphereGeometry(1.45, 28, 18), fur); body.scale.set(1.46, .75, .78); body.position.set(0, 1.35, 0); hound.add(body);
   const chest = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 16), warm); chest.scale.set(.9, 1.08, .84); chest.position.set(.95, 1.42, -.05); hound.add(chest);
