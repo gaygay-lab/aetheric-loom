@@ -38,7 +38,7 @@ const palette = {
 };
 
 const chapters = [
-  { title: '观象台苏醒', kicker: 'CHAPTER 01 / AWAKENING', description: '在第一束光抵达之前，星尘先把沉默织成了环。', start: 0, end: 36 },
+  { title: '观象台苏醒', kicker: 'CHAPTER 01 / AWAKENING', description: '在第一束光抵达之前，一只野狗守着平台边缘，星尘把沉默织成了环。', start: 0, end: 36 },
   { title: '流光经过', kicker: 'CHAPTER 02 / DRIFTING LIGHT', description: '一道道光带从观象台的边缘穿过，把时间拉成了有厚度的丝。', start: 36, end: 72 },
   { title: '织机之心', kicker: 'CHAPTER 03 / THE LOOM', description: '晶体核心开始自转，所有轨道都朝向同一个不可见的中心。', start: 72, end: 108 },
   { title: '月背的回声', kicker: 'CHAPTER 04 / FAR SIDE', description: '越过织机的背面，月亮露出没有被照亮的那一半。', start: 108, end: 144 },
@@ -46,6 +46,7 @@ const chapters = [
 ];
 
 const state = { mode: 'film', playing: true, time: 0, speed: 1, quality: 1, uiHidden: false, yaw: 0, pitch: -0.12, freeSpeed: 0.18 };
+let hound;
 const filmPositions = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0, 6, 38), new THREE.Vector3(25, 11, 27), new THREE.Vector3(34, 20, -2),
   new THREE.Vector3(18, 9, -34), new THREE.Vector3(-17, 25, -37), new THREE.Vector3(-39, 10, -3),
@@ -152,6 +153,27 @@ function buildObservatory() {
   const moonGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: sprite, color: 0xa8c2ff, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false })); moonGlow.scale.set(22,22,1); moonGlow.position.copy(moon.position); root.add(moonGlow);
 }
 
+function buildHound() {
+  hound = new THREE.Group(); hound.name = 'wild-hound-guardian'; hound.position.set(-10.5, .95, 5.4); hound.rotation.y = -.32; root.add(hound);
+  const fur = mat(0x8b563d, 0x3e1f2b, .18, .82, .06); const darkFur = mat(0x39202a, 0x170f1b, .1, .9, .03); const warm = mat(0xc98252, 0x3e1b25, .28, .72, .08); const eye = mat(0xffc66e, 0xff7c47, 2.9, .18, .15);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(1.45, 28, 18), fur); body.scale.set(1.46, .75, .78); body.position.set(0, 1.35, 0); hound.add(body);
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 16), warm); chest.scale.set(.9, 1.08, .84); chest.position.set(.95, 1.42, -.05); hound.add(chest);
+  const neck = new THREE.Mesh(new THREE.SphereGeometry(.75, 24, 16), fur); neck.scale.set(.8, 1.15, .72); neck.position.set(1.15, 2.03, -.02); neck.rotation.z = -.18; hound.add(neck);
+  const head = new THREE.Group(); head.position.set(1.65, 2.72, -.08); head.rotation.z = -.09; hound.add(head); hound.userData.head = head;
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(.76, 24, 16), fur); skull.scale.set(1.06, .9, .84); head.add(skull);
+  const muzzle = new THREE.Mesh(new THREE.SphereGeometry(.42, 20, 14), warm); muzzle.scale.set(1.25, .66, .75); muzzle.position.set(.55, -.17, -.06); head.add(muzzle);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(.17, 16, 10), darkFur); nose.scale.set(1.2, .75, .9); nose.position.set(.99, -.13, -.06); head.add(nose);
+  for (const z of [-.36, .36]) { const e = new THREE.Mesh(new THREE.ConeGeometry(.34, 1.05, 5), darkFur); e.position.set(-.05, .64, z); e.rotation.set(z * .45, 0, z * .2); head.add(e); }
+  for (const z of [-.34, .34]) { const eyeMesh = new THREE.Mesh(new THREE.SphereGeometry(.09, 12, 8), eye); eyeMesh.position.set(.49, .13, z); head.add(eyeMesh); }
+  const jaw = new THREE.Mesh(new THREE.SphereGeometry(.23, 16, 10), darkFur); jaw.scale.set(1.45, .42, .68); jaw.position.set(.55, -.4, -.06); head.add(jaw);
+  const legs = [];
+  for (const [x, z, lean] of [[-.76,-.46,-.08],[-.76,.46,-.1],[.82,-.46,.08],[.82,.46,.1]]) { const leg = new THREE.Group(); leg.position.set(x, .77, z); leg.rotation.z = lean; const upper = new THREE.Mesh(new THREE.CylinderGeometry(.22, .29, 1.25, 12), fur); upper.position.y = -.48; leg.add(upper); const paw = new THREE.Mesh(new THREE.SphereGeometry(.27, 16, 10), darkFur); paw.scale.set(1.25, .43, .95); paw.position.set(.1, -1.12, 0); leg.add(paw); hound.add(leg); legs.push(leg); }
+  const tailCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(-1.3, 1.65, 0), new THREE.Vector3(-2.15, 2.2, .02), new THREE.Vector3(-2.9, 2.9, .1), new THREE.Vector3(-3.28, 2.32, .12)]);
+  const tail = new THREE.Mesh(new THREE.TubeGeometry(tailCurve, 32, .2, 10, false), fur); hound.add(tail); hound.userData.tail = tail;
+  for (let i = 0; i < 8; i++) { const tuft = new THREE.Mesh(new THREE.ConeGeometry(.16 - i * .009, .58 - i * .025, 5), i % 2 ? fur : warm); tuft.position.set(-.65 - i * .23, 2.02 + Math.sin(i * .8) * .12, (i % 3 - 1) * .18); tuft.rotation.z = Math.PI * .5; hound.add(tuft); }
+  hound.userData.chest = chest; hound.userData.legs = legs;
+}
+
 function setupLights() {
   scene.add(new THREE.HemisphereLight(0x9bbdff, 0x080a1b, 1.15));
   const key = new THREE.PointLight(palette.cyan, 38, 100, 2); key.position.set(0, 16, 4); root.add(key);
@@ -160,7 +182,7 @@ function setupLights() {
   const moon = new THREE.DirectionalLight(0xb9c7ff, 2.4); moon.position.set(-18, 30, -26); scene.add(moon);
 }
 
-function buildWorld() { addStars(); buildLoom(); buildObservatory(); setupLights(); }
+function buildWorld() { addStars(); buildLoom(); buildObservatory(); buildHound(); setupLights(); }
 buildWorld();
 
 const tmp = new THREE.Vector3(); const target = new THREE.Vector3();
@@ -187,6 +209,7 @@ function animateWorld(t) {
   loom.children.forEach((obj, i) => { if (obj.geometry?.type === 'TorusGeometry') obj.rotation.z += .0004 * (i % 2 ? -1 : 1); });
   orbiters.forEach((o, i) => { o.angle += .001 * o.speed * 60; const a = o.angle; const r = o.radius; o.object.position.set(Math.cos(a) * r, Math.sin(a * 2 + o.phase) * o.lift, Math.sin(a) * r); o.object.rotation.x += .005 + i * .0001; o.object.rotation.z -= .004; });
   stars.forEach((p, i) => { p.rotation.y += i ? .00008 : .000015; });
+  if (hound) { const breath = 1 + Math.sin(s * 2.2) * .018; hound.userData.chest.scale.y = 1.08 * breath; hound.userData.head.rotation.y = Math.sin(s * .55) * .035; hound.userData.tail.rotation.z = Math.sin(s * 1.4) * .07; hound.userData.legs.forEach((leg, i) => { leg.rotation.x = Math.sin(s * 1.1 + i * 1.7) * .018; }); }
 }
 
 function setProgress(v) { const pct = `${(v / 180) * 100}%`; const el = document.querySelector('#timeline'); el.value = v; el.style.setProperty('--progress', pct); document.querySelector('#elapsed').textContent = `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(Math.floor(v % 60)).padStart(2, '0')}`; }
